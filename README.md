@@ -4,7 +4,7 @@
 
 ## Tech Stack
 
-- Java 17
+- Java 21
 - Spring Framework
 - Spring Boot
 - Spring Data JPA
