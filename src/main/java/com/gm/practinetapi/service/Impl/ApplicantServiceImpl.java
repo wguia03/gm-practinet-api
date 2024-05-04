@@ -1,4 +1,4 @@
 package com.gm.practinetapi.service.Impl;
 
-public class JobVacancyService {
+public class ApplicantServiceImpl {
 }
