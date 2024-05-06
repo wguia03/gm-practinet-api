@@ -1,13 +1,13 @@
-package com.gm.practinetapi;
+package com.gm.practicasya;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class PractinetApiApplication {
+public class PracticasYaApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(PractinetApiApplication.class, args);
+		SpringApplication.run(PracticasYaApplication.class, args);
 	}
 
 }

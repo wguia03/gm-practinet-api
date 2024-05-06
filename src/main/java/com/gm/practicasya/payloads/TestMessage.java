@@ -1,4 +1,4 @@
-package com.gm.practinetapi.payloads;
+package com.gm.practicasya.payloads;
 
 public record TestMessage(String message) {
 }

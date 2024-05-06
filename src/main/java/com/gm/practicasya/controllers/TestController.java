@@ -1,6 +1,6 @@
-package com.gm.practinetapi.controllers;
+package com.gm.practicasya.controllers;
 
-import com.gm.practinetapi.payloads.TestMessage;
+import com.gm.practicasya.payloads.TestMessage;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
