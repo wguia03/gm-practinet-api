@@ -1,5 +1,7 @@
 package com.gm.practicasya.controllers;
 
+import com.gm.practicasya.exceptions.NotFoundException;
+import com.gm.practicasya.exceptions.UnauthorizedException;
 import com.gm.practicasya.payloads.AuthCreateUserRequest;
 import com.gm.practicasya.payloads.AuthLoginRequest;
 import com.gm.practicasya.payloads.AuthResponse;
@@ -26,7 +28,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody @Valid AuthLoginRequest userRequest) {
+    public ResponseEntity<AuthResponse> login(@RequestBody @Valid AuthLoginRequest userRequest) throws NotFoundException, UnauthorizedException {
         return new ResponseEntity<>(userService.loginUser(userRequest), HttpStatus.OK);
     }
 }

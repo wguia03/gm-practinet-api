@@ -2,6 +2,8 @@ package com.gm.practicasya.services;
 
 import com.gm.practicasya.entities.Role;
 import com.gm.practicasya.entities.UserEntity;
+import com.gm.practicasya.exceptions.NotFoundException;
+import com.gm.practicasya.exceptions.UnauthorizedException;
 import com.gm.practicasya.payloads.AuthCreateUserRequest;
 import com.gm.practicasya.payloads.AuthLoginRequest;
 import com.gm.practicasya.payloads.AuthResponse;
@@ -9,14 +11,12 @@ import com.gm.practicasya.repositories.RoleRepository;
 import com.gm.practicasya.repositories.UserRepository;
 import com.gm.practicasya.utils.JwtUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -64,6 +64,12 @@ public class UserService {
 
         UserEntity userSaved = userRepository.save(userEntity);
 
+        Set<String> rolesResponse = new HashSet<>();
+
+        for(Role role : userSaved.getRoles()) {
+            rolesResponse.add(role.getRoleEnum().name());
+        }
+
         ArrayList<SimpleGrantedAuthority> authorities = new ArrayList<>();
 
         userSaved.getRoles().forEach(role -> authorities.add(new SimpleGrantedAuthority("ROLE_".concat(role.getRoleEnum().name()))));
@@ -77,7 +83,7 @@ public class UserService {
                 accessToken,
                 userSaved.getId(),
                 userSaved.getUsername(),
-                userSaved.getRoles(),
+                rolesResponse,
                 userSaved.getFirstName(),
                 userSaved.getLastName(),
                 userSaved.getPhoneNumber(),
@@ -86,23 +92,29 @@ public class UserService {
         );
     }
 
-    public AuthResponse loginUser(AuthLoginRequest authLoginRequest) {
+    public AuthResponse loginUser(AuthLoginRequest authLoginRequest) throws NotFoundException, UnauthorizedException {
 
         String username = authLoginRequest.username();
         UserEntity userEntity = userRepository.findUserEntityByUsername(username).orElseThrow(() ->
-                new UsernameNotFoundException("Username is not available"));
+                new NotFoundException("Username is not available"));
 
         String password = authLoginRequest.password();
 
         Authentication authentication = this.authenticate(username, password);
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
+        Set<String> rolesResponse = new HashSet<>();
+
+        for(Role role : userEntity.getRoles()) {
+            rolesResponse.add(role.getRoleEnum().name());
+        }
+
         String accessToken = jwtUtils.createToken(authentication);
         return new AuthResponse(
                 accessToken,
                 userEntity.getId(),
                 userEntity.getUsername(),
-                userEntity.getRoles(),
+                rolesResponse,
                 userEntity.getFirstName(),
                 userEntity.getLastName(),
                 userEntity.getPhoneNumber(),
@@ -111,15 +123,11 @@ public class UserService {
         );
     }
 
-    public Authentication authenticate(String username, String password) {
+    public Authentication authenticate(String username, String password) throws UnauthorizedException {
         UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(username);
 
-        if (userDetails == null) {
-            throw new BadCredentialsException("Invalid username");
-        }
-
         if (!passwordEncoder.matches(password, userDetails.getPassword())) {
-            throw new BadCredentialsException("Invalid Password");
+            throw new UnauthorizedException("Invalid Password");
         }
 
         return new UsernamePasswordAuthenticationToken(username, password, userDetails.getAuthorities());
